@@ -10,3 +10,4 @@ app/config/local
 app/config/testing
 production
 _ide_*
+tests/_output/*

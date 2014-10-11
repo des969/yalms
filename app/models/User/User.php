@@ -21,16 +21,24 @@ use Illuminate\Auth\UserTrait;
  * @property string      $password
  * @property string      $remember_token
  * @property boolean     $enabled
- *
  * @property UserStudent $student
  * @property UserTeacher $teacher
  * @property UserAdmin   $admin
- *
  * @method static User whereEnabled($boolean)
  * @method static User wherePhone($phone)
  * @method static User findOrFail($phone)
  * @method static User first()
- *
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @method static \Illuminate\Database\Query\Builder|\Yalms\Models\Users\User whereId($value) 
+ * @method static \Illuminate\Database\Query\Builder|\Yalms\Models\Users\User whereFirstName($value) 
+ * @method static \Illuminate\Database\Query\Builder|\Yalms\Models\Users\User whereLastName($value) 
+ * @method static \Illuminate\Database\Query\Builder|\Yalms\Models\Users\User whereMiddleName($value) 
+ * @method static \Illuminate\Database\Query\Builder|\Yalms\Models\Users\User whereEmail($value) 
+ * @method static \Illuminate\Database\Query\Builder|\Yalms\Models\Users\User wherePassword($value) 
+ * @method static \Illuminate\Database\Query\Builder|\Yalms\Models\Users\User whereRememberToken($value) 
+ * @method static \Illuminate\Database\Query\Builder|\Yalms\Models\Users\User whereCreatedAt($value) 
+ * @method static \Illuminate\Database\Query\Builder|\Yalms\Models\Users\User whereUpdatedAt($value) 
  */
 class User extends Eloquent implements UserInterface, RemindableInterface
 {
