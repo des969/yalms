@@ -18,7 +18,8 @@ Route::get('/', function () {
 
 Route::resource('student', 'StudentController');
 Route::resource('teacher', 'TeacherController');
-Route::resource('course', 'CourseController');
+Route::resource('course',  'CourseController');
+Route::resource('exam',  'ExamController');
 
 Route::group(array('prefix' => 'api/v1'), function () {
 	Route::resource('user', 'app\controllers\Api\User\UserController');
