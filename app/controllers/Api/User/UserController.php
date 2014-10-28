@@ -1,10 +1,10 @@
 <?php
 namespace app\controllers\Api\User;
 
-use Response;
-use Yalms\Models\Users\User;
-use Yalms\Component\User\UserComponent;
 use Input;
+use Response;
+use Yalms\Component\User\UserComponent;
+use Yalms\Models\Users\User;
 
 class UserController extends \BaseController
 {
@@ -76,6 +76,38 @@ class UserController extends \BaseController
 				'message' => $userComp->message
 			)
 		);
+	}
+
+	/**
+	 * вот так было бы лучше:
+	 */
+	public function storeReviewExample()
+	{
+		$userComp = new UserComponent(Input::all());
+		$result = $userComp->storeNewUser();
+
+		if ($result) {
+			// уже есть метод выдачи данных пользоваля, надо им пользоваться всегда,
+			// когда мы хотим выдать данные пользователя
+			return $this->show($userComp->user->id);
+		}
+
+		// это использовать везде, иначе копипаст во всех методах контроллера, плохо!
+		return $this->error($userComp->message);
+	}
+
+	// ОДИН метод возвраща ошибки на ВЕСЬ АПИ!
+	// если так сделать, моментально решится проблема формата данных
+	// который сейчас сильно отличается с другим разработчиком
+	private function error($message)
+	{
+
+		return Response::json(array(
+				'result'  => false,
+				'message' => $message
+			)
+		);
+
 	}
 
 

@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\View;
+// уже говорил об этом на встречах - неправильный импорт - прекратить повторять эти ошибки немедленно!
 use Yalms\Component\Course\CourseComponent;
 use Yalms\Models\Courses\Course;
 
@@ -48,7 +46,8 @@ class CourseController extends \BaseController
             $id = Session::get('courseId');
             return Redirect::action('CourseController@show', array($id));
         } else
-            //Вертаем на страницу создания с соответствующим оповещением
+	        // как ж так, без скобок ??? отрыв рук без суда и следствия!
+	        //Вертаем на страницу создания с соответствующим оповещением
             return Redirect::action('CourseController@create')->withErrors($courseComponent->errors);
     }
 

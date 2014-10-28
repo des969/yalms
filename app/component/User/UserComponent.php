@@ -1,12 +1,12 @@
 <?php
 namespace Yalms\Component\User;
 
+use DB;
+use Validator;
 use Yalms\Models\Users\User;
 use Yalms\Models\Users\UserAdmin;
 use Yalms\Models\Users\UserStudent;
 use Yalms\Models\Users\UserTeacher;
-use DB;
-use Validator;
 
 
 class UserComponent
@@ -142,6 +142,8 @@ class UserComponent
 
 		$this->user = new User;
 		$this->user->phone = $this->input['phone'];
+		// метод что-то возвращает, но это никак не обрабатывается
+		// может тогда и не нужно ему ничего возвращать?
 		$this->prepareToSave(array(
 				'first_name',
 				'middle_name',
@@ -152,9 +154,15 @@ class UserComponent
 		);
 
 		$activeConnection = DB::connection();
+		// лучше:
+		// $activeConnection = $this->user->getConnection();
+		// т.к. коннектов может быть много в будущем
+		// и лучше брать тот, который конкретно привязан к модели
 		$activeConnection->beginTransaction();
 
 		try {
+			// не может не сохранить
+			// сохраняет или упадет с исключением
 			if ($this->user->save()) {
 				$isSaved = true;
 
@@ -170,6 +178,10 @@ class UserComponent
 				$student->user_id = $this->user->id;
 				$isSaved &= $student->save();
 
+				// опять же, нет смысла проверять, 100% всегда сохранит
+				// или бросит исключение, если не сможет
+				// а очень грубые ошибки должны отлавливаться тестами
+				// вобщем это вполне себе лишний код и два зря страдающих котенка...
 				if ($isSaved) {
 					$activeConnection->commit();
 					$this->message = 'This user is saved';
@@ -201,7 +213,10 @@ class UserComponent
 		if (empty($this->user->id)) {
 			$this->message = 'User not found';
 			$this->status = 404;
-
+			// компонент - не контроллер, а знает о 404-х ошибках... ну не компонента это задача
+			// детализировать коды ошибок http
+			// а у другого разработчика и вовсе status это текстовое название
+			// кажется договаривались о едином формате в скайпе, нет?
 			return false;
 		}
 
@@ -249,15 +264,20 @@ class UserComponent
 		$this->user = User::find($id);
 		if (empty($this->user->id)) {
 			$this->message = 'User not found';
-
+			// а здесь и вовсе код потерялся, в предыдущем методе есть 404
+			// даже если и делать не совсем правильно, то хотя бы везде одинаково :-)
 			return false;
 		}
 
+		// см. выше
 		$activeConnection = DB::connection();
 		$activeConnection->beginTransaction();
 
 		try {
 			$isChanged = false;
+			// ну не может не быть $this->user->admin->enabled, всегда есть
+			// иначе это значит что база неконсистентная и все очеь плохо
+			// и много здесь лишнего кода, не стоит на таких вещах мелочно экономить
 			if (isset($this->user->admin->enabled) && $this->user->admin->enabled) {
 				$this->user->admin->enabled = false;
 				$isChanged = true;
@@ -273,6 +293,15 @@ class UserComponent
 			if ($isChanged) {
 				$this->user->push();
 			}
+
+			// лучше так:
+			// $this->deleteUser() // приватным методом
+			// а внутри просто:
+			// $this->user->admin->enabled = false;
+			// $this->user->teacher->enabled = false;
+			// $this->user->student->enabled = false;
+			// $this->user->push();
+			// $this->user->delete();
 
 			$result = $this->user->delete();
 			$this->message = ($result) ? 'Data deleted successfully' : 'Failed to delete data';
