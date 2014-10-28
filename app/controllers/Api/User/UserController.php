@@ -4,6 +4,7 @@ namespace app\controllers\Api\User;
 use Response;
 use Yalms\Models\Users\User;
 use Yalms\Component\User\UserComponent;
+use Input;
 
 class UserController extends \BaseController
 {
@@ -15,7 +16,11 @@ class UserController extends \BaseController
 	 */
 	public function index()
 	{
-		return Response::json(UserComponent::showUsers('1')); // Параметр означает условие запроса enabled=='1'
+		$userComp = new UserComponent(Input::all());
+
+		return Response::json(
+			$userComp->showUsers()
+		);
 	}
 
 
@@ -26,7 +31,24 @@ class UserController extends \BaseController
 	 */
 	public function create()
 	{
-		//
+
+		return Response::json(array(
+			'edit_fields'     => array(
+				'last_name'             => 'Фамилия',
+				'first_name'            => 'Имя',
+				'middle_name'           => 'Отчество',
+				'email'                 => 'Электронная почта',
+				'phone'                 => 'Номер телефона',
+				'password'              => 'Пароль',
+				'password_confirmation' => 'Подтверждение пароля'
+			),
+			'required_fields' => array(
+				'first_name',
+				'phone',
+				'password',
+				'password_confirmation'
+			)
+		));
 	}
 
 
@@ -37,13 +59,23 @@ class UserController extends \BaseController
 	 */
 	public function store()
 	{
-		$userComp = new UserComponent;
+		$userComp = new UserComponent(Input::all());
 		$result = $userComp->storeNewUser();
 
-		return [
-			'result'  => $result,
-			'message' => $userComp->message
-		];
+		if ($result) {
+			$user = User::find(
+				$userComp->user->id,
+				array('id', 'first_name', 'middle_name', 'last_name', 'email', 'phone')
+			);
+
+			return Response::json($user, 201);
+		}
+
+		return Response::json(array(
+				'result'  => false,
+				'message' => $userComp->message
+			)
+		);
 	}
 
 
@@ -56,10 +88,10 @@ class UserController extends \BaseController
 	 */
 	public function show($id)
 	{
-		$user = User::findOrFail($id, array('id', 'first_name', 'middle_name', 'last_name', 'email', 'phone'));
+		$user = User::with('teacher', 'student', 'admin')
+			->findOrFail($id, array('id', 'first_name', 'middle_name', 'last_name', 'email', 'phone'));
 
-		return Response::json($user);
-
+		return Response::json(['user' => $user]);
 	}
 
 
@@ -72,7 +104,22 @@ class UserController extends \BaseController
 	 */
 	public function edit($id)
 	{
-		//
+		$user = User::findOrFail($id, array('id', 'first_name', 'middle_name', 'last_name', 'email', 'phone'));
+
+		$fields = array(
+			'last_name'             => 'Фамилия',
+			'first_name'            => 'Имя',
+			'middle_name'           => 'Отчество',
+			'email'                 => 'Электронная почта',
+			'password'              => 'Пароль',
+			'password_confirmation' => 'Подтверждение пароля'
+		);
+
+		return Response::json(array(
+				'user'        => $user,
+				'edit_fields' => $fields
+			)
+		);
 	}
 
 
@@ -85,12 +132,19 @@ class UserController extends \BaseController
 	 */
 	public function update($id)
 	{
-		$userComponent = new UserComponent();
+		$userComponent = new UserComponent(\Input::all());
 		$result = $userComponent->update($id);
 
+		if ($userComponent->status == 404) {
+			return Response::json($userComponent->message, 404);
+		}
+		if ($result) {
+			return $this->show($id);
+		}
+
 		return Response::json(array(
-				'result'  => $result,
-				'message' => $userComponent->message
+				'result' => false,
+				'errors' => $userComponent->message
 			)
 		);
 	}

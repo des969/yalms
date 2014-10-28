@@ -11,6 +11,7 @@ use Eloquent;
  * @property boolean $enabled
  * @method static UserStudent first
  * @method static UserStudent find($id) first
+ * @method static UserStudent whereEnabled($boolean)
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @method static \Illuminate\Database\Query\Builder|\Yalms\Models\Users\UserStudent whereUserId($value) 
@@ -29,5 +30,12 @@ class UserStudent extends Eloquent
 	 */
 	protected $primaryKey = 'user_id';
 
+	/**
+	 * @return User
+	 */
+	public function user()
+	{
+		return $this->belongsTo(User::class);
+	}
 
 }

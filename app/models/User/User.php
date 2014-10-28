@@ -7,6 +7,7 @@ use Illuminate\Auth\Reminders\RemindableInterface;
 use Illuminate\Auth\Reminders\RemindableTrait;
 use Illuminate\Auth\UserInterface;
 use Illuminate\Auth\UserTrait;
+use Illuminate\Database\Eloquent\SoftDeletingTrait;
 
 
 /**
@@ -43,7 +44,7 @@ use Illuminate\Auth\UserTrait;
  */
 class User extends Eloquent implements UserInterface, RemindableInterface
 {
-	use UserTrait, RemindableTrait;
+	use UserTrait, RemindableTrait, SoftDeletingTrait;
 
 	/**
 	 * The database table used by the model.
@@ -57,8 +58,9 @@ class User extends Eloquent implements UserInterface, RemindableInterface
 	 *
 	 * @var array
 	 */
-	protected $hidden = array('password', 'remember_token', 'enabled');
+	protected $hidden = array('password', 'remember_token', 'enabled', 'email', 'phone');
 
+	protected $dates = ['deleted_at'];
 
 	public function student()
 	{
