@@ -102,7 +102,7 @@ class UserComponent
 		$params = $this->getParameters();
 
 		$users = null;
-		if ($params->state == 'in') {
+		if ($params->state == '1') {
 			$users = User::with('teacher', 'student', 'admin')->orderBy($params->sort, $params->direction)->paginate(
 				$params->per_page,
 				array('id', 'first_name', 'middle_name', 'last_name', 'created_at', 'updated_at')
